@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timer de Cores com Display</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            transition: background-color 0.1s;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* Classe aplicada quando a tela fica vermelha */
+        body.red-screen {
+            background-color: red;
+        }
+
+        /* O cursor vira um "dedo" no Modo 1 quando a tela está vermelha */
+        body.clickable {
+            cursor: pointer;
+        }
+
+        /* Estilo do número do Timer na tela */
+        #timer-display {
+            font-size: 25vw; /* Tamanho responsivo gigante */
+            font-weight: bold;
+            color: #333; /* Cor escura no fundo branco */
+            pointer-events: none; /* Permite que o clique atravesse o texto e atinja o body */
+            transition: color 0.1s;
+        }
+
+        /* Quando a tela fica vermelha, o texto fica branco */
+        body.red-screen #timer-display {
+            color: white;
+        }
+
+        #btn-config {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            z-index: 10;
+        }
+
+        #modal-config {
+            position: absolute;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 20;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 300px;
+        }
+
+        #modal-config.show {
+            display: flex;
+        }
+
+        .config-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        h2 {
+            margin: 0 0 10px 0;
+            font-size: 20px;
+        }
+
+        button.save {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button.save:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <button id="btn-config">⚙️ Configurações</button>
+
+    <div id="timer-display">0</div>
+
+    <div id="modal-config" class="show">
+        <h2>Configurações do Timer</h2>
+        
+        <div class="config-group">
+            <label>
+                <input type="radio" name="mode" value="1" checked> 
+                Modo 1 (Toque na tela para reiniciar)
+            </label>
+            <label>
+                <input type="radio" name="mode" value="2"> 
+                Modo 2 (Reinício automático após Timer 2)
+            </label>
+        </div>
+
+        <div class="config-group">
+            <label for="time1">Timer Principal (segundos):</label>
+            <input type="number" id="time1" value="30" min="1">
+        </div>
+
+        <div class="config-group">
+            <label for="time2">Timer Secundário [Modo 2] (segundos):</label>
+            <input type="number" id="time2" value="10" min="1">
+        </div>
+
+        <button class="save" id="btn-save">Salvar e Iniciar</button>
+    </div>
+
+    <script>
+        const body = document.body;
+        const btnConfig = document.getElementById('btn-config');
+        const modalConfig = document.getElementById('modal-config');
+        const btnSave = document.getElementById('btn-save');
+        const display = document.getElementById('timer-display');
+        
+        const inputTime1 = document.getElementById('time1');
+        const inputTime2 = document.getElementById('time2');
+        const radiosMode = document.getElementsByName('mode');
+
+        let mode = 1;
+        let time1 = 30; // Agora armazenamos direto em segundos
+        let time2 = 10;
+        
+        let currentIntervalId = null;
+        let isScreenRed = false;
+
+        // Abre a janela de configurações
+        btnConfig.addEventListener('click', (e) => {
+            e.stopPropagation();
+            abrirConfiguracoes();
+        });
+
+        // Impede que cliques no modal ativem o body
+        modalConfig.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Salva e inicia
+        btnSave.addEventListener('click', () => {
+            time1 = parseInt(inputTime1.value);
+            time2 = parseInt(inputTime2.value);
+            mode = parseInt(Array.from(radiosMode).find(r => r.checked).value);
+
+            modalConfig.classList.remove('show');
+            iniciarCiclo();
+        });
+
+        // Lógica de clique na tela para o Modo 1
+        body.addEventListener('click', () => {
+            if (mode === 1 && isScreenRed && !modalConfig.classList.contains('show')) {
+                iniciarCiclo();
+            }
+        });
+
+        function abrirConfiguracoes() {
+            clearInterval(currentIntervalId);
+            body.classList.remove('red-screen', 'clickable');
+            isScreenRed = false;
+            display.textContent = "0";
+            modalConfig.classList.add('show');
+        }
+
+        // Função auxiliar para rodar um timer visível na tela
+        function rodarTimer(segundos, onComplete) {
+            let tempoRestante = segundos;
+            display.textContent = tempoRestante;
+
+            currentIntervalId = setInterval(() => {
+                tempoRestante--;
+                
+                if (tempoRestante > 0) {
+                    display.textContent = tempoRestante;
+                } else {
+                    clearInterval(currentIntervalId);
+                    display.textContent = "0";
+                    if (onComplete) onComplete();
+                }
+            }, 1000);
+        }
+
+        function iniciarCiclo() {
+            clearInterval(currentIntervalId);
+            
+            // Reseta a tela para branco
+            body.classList.remove('red-screen', 'clickable');
+            isScreenRed = false;
+
+            // Roda o Timer 1 (Tela Branca)
+            rodarTimer(time1, () => {
+                // Fim do Timer 1: Tela fica vermelha
+                body.classList.add('red-screen');
+                isScreenRed = true;
+
+                if (mode === 1) {
+                    // Modo 1: Avisa o usuário que ele pode clicar
+                    body.classList.add('clickable');
+                    display.textContent = "";
+                } else if (mode === 2) {
+                    // Modo 2: Roda o Timer 2 automaticamente
+                    rodarTimer(time2, () => {
+                        // Fim do Timer 2: Reinicia o ciclo inteiro
+                        iniciarCiclo();
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
