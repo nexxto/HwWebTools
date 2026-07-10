@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HW Tools</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --accent: #007bff;
+            --accent-hover: #0056b3;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-main);
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Grid de Ferramentas */
+        #tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        /* Estilo dos Cards */
+        .tool-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e0e0e0;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            border-color: var(--accent);
+        }
+
+        .tool-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            text-transform: capitalize;
+        }
+
+        .tool-path {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-family: monospace;
+            background: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            align-self: flex-start;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>HW Tools</h1>
+        <p class="subtitle">Selecione uma ferramenta abaixo para iniciar</p>
+    </header>
+
+    <div id="tools-grid">
+        <!-- Os cards serão injetados aqui pelo JavaScript -->
+    </div>
+
+    <script>
+        const folders = [
+            "SeparadorDeTags",
+            "Timer" 
+        ];
+
+        const grid = document.getElementById('tools-grid');
+
+        function formatName(folderName) {
+            return folderName.replace(/-/g, ' ');
+        }
+
+        // 3. Gerar os cards dinamicamente
+        folders.forEach(folder => {
+            const card = document.createElement('a');
+            // O link aponta para a pasta. O servidor vai abrir o index.html de dentro dela.
+            card.href = `./${folder}/`;
+            card.className = 'tool-card';
+
+            card.innerHTML = `
+                <div class="tool-title">${formatName(folder)}</div>
+                <div class="tool-path">/${folder}</div>
+            `;
+
+            grid.appendChild(card);
+        });
+    </script>
+</body>
+</html>
