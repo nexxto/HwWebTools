@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Validador de Código de Barras</title>
+    <title>Separador de tags</title>
     <style>
-        /* Estilos básicos para deixar a interface limpa e legível */
         body { 
             font-family: Arial, sans-serif; 
-            transition: background-color 0.2s ease; /* Transição suave de cor */
+            transition: background-color 0.2s ease; 
             padding: 20px; 
-            background-color: #ffffff; /* Fundo padrão inicial */
+            background-color: #ffffff; 
         }
         .container { 
             background: rgba(255, 255, 255, 0.95); 
@@ -102,103 +101,16 @@
                 <thead>
                     <tr>
                         <th>Código Escaneado</th>
-                        <th>Encontrado na lista</th>
+                        <th>Resultado</th>
                     </tr>
                 </thead>
                 <tbody>
-                    </tbody>
+                    <!-- Os resultados vão aparecer aqui -->
+                </tbody>
             </table>
         </div>
     </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // Referências aos elementos do HTML
-            const list1Input = document.getElementById("list1");
-            const color1Input = document.getElementById("color1");
-            const list2Input = document.getElementById("list2");
-            const color2Input = document.getElementById("color2");
-            const scannerInput = document.getElementById("scanner");
-            const logTableBody = document.querySelector("#logTable tbody");
-            const copyBtn = document.getElementById("copyBtn");
-
-            // Função que transforma a string gigante em um array limpo
-            function parseList(text) {
-                // Divide usando espaço, vírgula ou ponto-e-vírgula e remove espaços vazios
-                return text.split(/[\s,;]+/).filter(item => item.trim() !== "");
-            }
-
-            // Escuta as teclas digitadas no campo do leitor
-            scannerInput.addEventListener("keypress", function(e) {
-                // Verifica se a tecla pressionada foi o "Enter"
-                if (e.key === "Enter") {
-                    const code = this.value.trim();
-                    if (!code) return; // Se estiver vazio, ignora
-
-                    // Pega as listas no momento do scan
-                    const list1 = parseList(list1Input.value);
-                    const list2 = parseList(list2Input.value);
-                    
-                    let resultText = "";
-                    let bgColor = "#ffffff"; // Branco por padrão
-
-                    // Verifica em qual lista está
-                    if (list1.includes(code)) {
-                        bgColor = color1Input.value;
-                        resultText = "1";
-                    } else if (list2.includes(code)) {
-                        bgColor = color2Input.value;
-                        resultText = "2";
-                    } else {
-                        resultText = "Não encontrado";
-                    }
-
-                    // Altera a cor do fundo do site
-                    document.body.style.backgroundColor = bgColor;
-
-                    // Registra no histórico (no topo da tabela)
-                    const row = document.createElement("tr");
-                    
-                    const cellCode = document.createElement("td");
-                    cellCode.textContent = code;
-                    
-                    const cellResult = document.createElement("td");
-                    cellResult.textContent = resultText;
-                    
-                    row.appendChild(cellCode);
-                    row.appendChild(cellResult);
-                    logTableBody.prepend(row); // prepend insere a nova linha sempre acima das antigas
-
-                    // Limpa o campo do scanner para o próximo código
-                    this.value = "";
-                }
-            });
-
-            // Lógica para copiar o histórico para a área de transferência
-            copyBtn.addEventListener("click", () => {
-                let textToCopy = "Código\tResultado\n"; // \t (tabulação) separa bem para colar no Excel/Planilhas
-                
-                const rows = logTableBody.querySelectorAll("tr");
-                if (rows.length === 0) {
-                    alert("O histórico está vazio!");
-                    return;
-                }
-
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll("td");
-                    if (cells.length === 2) {
-                        textToCopy += `${cells[0].textContent}\t${cells[1].textContent}\n`;
-                    }
-                });
-
-                // Tenta copiar para a área de transferência usando a API do navegador
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    alert("Histórico copiado com sucesso! Você já pode colar (Ctrl+V) no Excel ou Bloco de Notas.");
-                }).catch(err => {
-                    alert("Erro ao copiar o histórico: " + err);
-                });
-            });
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
